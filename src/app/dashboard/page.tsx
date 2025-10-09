@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { 
   DollarSign, 
   TrendingUp, 
@@ -10,7 +11,8 @@ import {
   Calendar,
   Plus,
   Filter,
-  LogOut
+  LogOut,
+  Shield
 } from 'lucide-react'
 import ExpenseForm from '@/components/ExpenseForm'
 import IncomeForm from '@/components/IncomeForm'
@@ -18,6 +20,33 @@ import ExpenseList from '@/components/ExpenseList'
 import IncomeList from '@/components/IncomeList'
 import AnalyticsChart from '@/components/AnalyticsChart'
 import TransactionsTable from '@/components/TransactionsTable'
+import BudgetList from '@/components/BudgetList'
+import RecurringTransactionList from '@/components/RecurringTransactionList'
+import ImportExportManager from '@/components/ImportExportManager'
+import CurrencySelector from '@/components/CurrencySelector'
+import SpendingInsights from '@/components/SpendingInsights'
+import QuickAdd from '@/components/QuickAdd'
+import TransactionSearch from '@/components/TransactionSearch'
+import SearchResults from '@/components/SearchResults'
+import SpendingLimits from '@/components/SpendingLimits'
+import PDFExport from '@/components/PDFExport'
+import { formatCurrency } from '@/lib/currency'
+import ThemeToggle from '@/components/ThemeToggle'
+
+interface SearchResult {
+  id: string
+  type: 'expense' | 'income'
+  amount: number
+  description?: string
+  date: string
+  categoryId?: string
+  category?: {
+    id: string
+    name: string
+    color: string
+  }
+  source?: string
+}
 
 interface AnalyticsData {
   summary: {
@@ -42,6 +71,8 @@ export default function Dashboard() {
   const [period, setPeriod] = useState('month')
   const [showExpenseForm, setShowExpenseForm] = useState(false)
   const [showIncomeForm, setShowIncomeForm] = useState(false)
+  const [userCurrency, setUserCurrency] = useState('BDT')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   
   // Date range state
   const [customDateRange, setCustomDateRange] = useState({
@@ -99,6 +130,19 @@ export default function Dashboard() {
     }
   }, [session, period, customDateRange, isCustomRange, fetchAnalytics])
 
+  useEffect(() => {
+    // Listen for refresh events from other components
+    const handleRefreshEvent = () => {
+      fetchAnalytics()
+    }
+    
+    window.addEventListener('refreshTransactions', handleRefreshEvent)
+    
+    return () => {
+      window.removeEventListener('refreshTransactions', handleRefreshEvent)
+    }
+  }, [fetchAnalytics])
+
   const handleSignOut = async () => {
     await fetch('/api/auth/signout', { method: 'POST' })
     router.push('/auth/signin')
@@ -134,19 +178,35 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Expense Tracker</h1>
-              <p className="text-sm text-gray-600">Welcome back, {session.user?.name}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-sofia-condensed">Expense Tracker</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-spline-mono">Welcome back, {session.user?.name}</p>
             </div>
             <div className="flex items-center space-x-4">
+              <PDFExport 
+                period={period} 
+                customDateRange={isCustomRange ? customDateRange : null} 
+              />
+              <ThemeToggle />
+              <CurrencySelector
+                currentCurrency={userCurrency}
+                onCurrencyChange={setUserCurrency}
+              />
+              <Link
+                href="/privacy"
+                className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
+              >
+                <Shield className="h-5 w-5" />
+                <span>Privacy</span>
+              </Link>
               <button
                 onClick={handleSignOut}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+                className="flex items-center space-x-2 text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 transition-colors"
               >
                 <LogOut className="h-5 w-5" />
                 <span>Sign Out</span>
@@ -156,7 +216,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Period Filter */}
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-4">
@@ -220,7 +280,7 @@ export default function Dashboard() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -229,7 +289,7 @@ export default function Dashboard() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Income</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  ৳{analytics?.summary?.totalIncomes?.toLocaleString() || '0'}
+                  {formatCurrency(analytics?.summary?.totalIncomes || 0, userCurrency)}
                 </p>
               </div>
             </div>
@@ -243,7 +303,7 @@ export default function Dashboard() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Expenses</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  ৳{analytics?.summary?.totalExpenses?.toLocaleString() || '0'}
+                  {formatCurrency(analytics?.summary?.totalExpenses || 0, userCurrency)}
                 </p>
               </div>
             </div>
@@ -263,7 +323,7 @@ export default function Dashboard() {
                 <p className={`text-2xl font-bold ${
                   (analytics?.summary?.netIncome || 0) >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  ৳{analytics?.summary?.netIncome?.toLocaleString() || '0'}
+                  {formatCurrency(analytics?.summary?.netIncome || 0, userCurrency)}
                 </p>
               </div>
             </div>
@@ -285,33 +345,81 @@ export default function Dashboard() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-4 mb-8">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
           <button
             onClick={() => setShowExpenseForm(true)}
-            className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            className="flex items-center justify-center space-x-2 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors"
           >
             <Plus className="h-5 w-5" />
             <span>Add Expense</span>
           </button>
           <button
             onClick={() => setShowIncomeForm(true)}
-            className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            className="flex items-center justify-center space-x-2 bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors"
           >
             <Plus className="h-5 w-5" />
             <span>Add Income</span>
           </button>
         </div>
 
+        {/* Spending Insights */}
+        <div className="mb-8">
+          <SpendingInsights currency={userCurrency} />
+        </div>
+
+        {/* Quick Add */}
+        <div className="mb-8">
+          <QuickAdd 
+            onExpenseAdded={fetchAnalytics}
+            currency={userCurrency}
+          />
+        </div>
+
+        {/* Transaction Search */}
+        <div className="mb-8">
+          <TransactionSearch 
+            onSearchResults={setSearchResults}
+            currency={userCurrency}
+          />
+        </div>
+
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <div className="mb-8">
+            <SearchResults 
+              transactions={searchResults}
+              currency={userCurrency}
+              onDelete={(id) => {
+                setSearchResults(prev => prev.filter(t => t.id !== id))
+              }}
+            />
+          </div>
+        )}
+
+        {/* Budget Goals and Spending Limits */}
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
+          <BudgetList />
+          <SpendingLimits currency={userCurrency} />
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Expenses by Category</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 font-sofia-condensed">Expenses by Category</h3>
             <AnalyticsChart data={analytics?.expensesByCategory} type="pie" />
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Daily Overview</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 font-sofia-condensed">Daily Overview</h3>
             <AnalyticsChart data={analytics?.dailyData} type="line" />
           </div>
+        </div>
+
+        {/* Recurring Transactions */}
+        <div className="mb-8">
+          <RecurringTransactionList />
+        </div>
+
+        {/* Import/Export */}
+        <div className="mb-8">
+          <ImportExportManager />
         </div>
 
         {/* Recent Transactions */}
@@ -325,17 +433,11 @@ export default function Dashboard() {
 
         {/* Separate Lists for Reference */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">Recent Expenses</h3>
-            </div>
-            <ExpenseList period={period} />
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <ExpenseList period={period} currency={userCurrency} itemsPerPage={5} />
           </div>
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">Recent Income</h3>
-            </div>
-            <IncomeList period={period} />
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <IncomeList period={period} currency={userCurrency} itemsPerPage={5} />
           </div>
         </div>
       </div>
@@ -368,6 +470,8 @@ export default function Dashboard() {
           }}
         />
       )}
+      </div>
     </div>
   )
 }
+

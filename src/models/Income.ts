@@ -6,6 +6,7 @@ export interface IIncome extends Document {
   description?: string
   source?: string
   date: Date
+  tags?: string[]
   userId: string
   createdAt: Date
   updatedAt: Date
@@ -30,6 +31,10 @@ const IncomeSchema = new Schema<IIncome>({
     required: true,
     default: Date.now,
   },
+  tags: [{
+    type: String,
+    ref: 'Tag',
+  }],
   userId: {
     type: String,
     required: true,

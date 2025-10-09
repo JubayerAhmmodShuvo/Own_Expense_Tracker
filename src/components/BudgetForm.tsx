@@ -4,17 +4,17 @@ import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { X, Calendar, DollarSign, FileText, Tag } from 'lucide-react'
+import { X, Target, DollarSign, Calendar, Tag } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 
-const expenseSchema = z.object({
+const budgetSchema = z.object({
+  name: z.string().min(1, 'Budget name is required'),
   amount: z.number().positive('Amount must be positive'),
-  description: z.string().optional(),
-  date: z.string().min(1, 'Date is required'),
+  period: z.enum(['monthly', 'weekly', 'yearly']),
   categoryId: z.string().optional(),
 })
 
-type ExpenseFormData = z.infer<typeof expenseSchema>
+type BudgetFormData = z.infer<typeof budgetSchema>
 
 interface Category {
   id: string
@@ -22,12 +22,19 @@ interface Category {
   color: string
 }
 
-interface ExpenseFormProps {
+interface BudgetFormProps {
   onClose: () => void
   onSuccess: () => void
+  budget?: {
+    id: string
+    name: string
+    amount: number
+    period: 'monthly' | 'weekly' | 'yearly'
+    categoryId?: string
+  } | null
 }
 
-export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
+export default function BudgetForm({ onClose, onSuccess, budget }: BudgetFormProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
@@ -38,10 +45,14 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ExpenseFormData>({
-    resolver: zodResolver(expenseSchema),
+    reset,
+  } = useForm<BudgetFormData>({
+    resolver: zodResolver(budgetSchema),
     defaultValues: {
-      date: new Date().toISOString().split('T')[0],
+      name: '',
+      amount: 0,
+      period: 'monthly',
+      categoryId: '',
     },
   })
 
@@ -76,15 +87,28 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
 
   useEffect(() => {
     fetchCategories()
-  }, [fetchCategories])
+    
+    // If editing an existing budget, populate the form
+    if (budget) {
+      reset({
+        name: budget.name,
+        amount: budget.amount,
+        period: budget.period,
+        categoryId: budget.categoryId || '',
+      })
+    }
+  }, [budget, reset, fetchCategories])
 
-  const onSubmit = async (data: ExpenseFormData) => {
+  const onSubmit = async (data: BudgetFormData) => {
     setIsLoading(true)
     setError('')
 
     try {
-      const response = await fetch('/api/expenses', {
-        method: 'POST',
+      const url = budget ? `/api/budgets/${budget.id}` : '/api/budgets'
+      const method = budget ? 'PUT' : 'POST'
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -92,44 +116,47 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
       })
 
       if (response.ok) {
+        const action = budget ? 'updated' : 'created'
         addToast({
           type: 'success',
-          title: 'Expense Added Successfully!',
-          message: `৳${data.amount.toLocaleString()} has been added to your expenses.`,
+          title: `Budget ${action.charAt(0).toUpperCase() + action.slice(1)} Successfully!`,
+          message: `Your budget "${data.name}" has been ${action}.`,
         })
         onSuccess()
       } else {
         const errorData = await response.json()
-        const errorMessage = errorData.error || 'Failed to create expense'
+        const errorMessage = errorData.error || `Failed to ${budget ? 'update' : 'create'} budget`
         setError(errorMessage)
         addToast({
           type: 'error',
-          title: 'Failed to Add Expense',
+          title: `Failed to ${budget ? 'Update' : 'Create'} Budget`,
           message: errorMessage,
         })
       }
-        } catch (error) {
-          console.error('Expense creation error:', error)
-          const errorMessage = 'An error occurred. Please try again.'
-          setError(errorMessage)
-          addToast({
-            type: 'error',
-            title: 'Network Error',
-            message: errorMessage,
-          })
-        } finally {
+    } catch (error) {
+      console.error('Budget operation error:', error)
+      const errorMessage = 'An error occurred. Please try again.'
+      setError(errorMessage)
+      addToast({
+        type: 'error',
+        title: 'Network Error',
+        message: errorMessage,
+      })
+    } finally {
       setIsLoading(false)
     }
   }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white font-sofia-condensed">Add Expense</h2>
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-xl font-semibold text-gray-900">
+            {budget ? 'Edit Budget' : 'Create Budget'}
+          </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+            className="text-gray-400 hover:text-gray-600"
           >
             <X className="h-6 w-6" />
           </button>
@@ -137,10 +164,30 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-md">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
               {error}
             </div>
           )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Budget Name *
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Target className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                {...register('name')}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                placeholder="Enter budget name"
+              />
+            </div>
+            {errors.name && (
+              <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>
+            )}
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -154,7 +201,7 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
                 type="number"
                 step="0.01"
                 {...register('amount', { valueAsNumber: true })}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black dark:text-white dark:bg-gray-700"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 placeholder="0.00"
               />
             </div>
@@ -165,43 +212,29 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FileText className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                {...register('description')}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black dark:text-white dark:bg-gray-700"
-                placeholder="Enter description"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date *
+              Period *
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Calendar className="h-5 w-5 text-gray-400" />
               </div>
-              <input
-                type="date"
-                {...register('date')}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black dark:text-white dark:bg-gray-700"
-              />
+              <select
+                {...register('period')}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+              >
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+                <option value="yearly">Yearly</option>
+              </select>
             </div>
-            {errors.date && (
-              <p className="text-red-600 text-sm mt-1">{errors.date.message}</p>
+            {errors.period && (
+              <p className="text-red-600 text-sm mt-1">{errors.period.message}</p>
             )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category
+              Category (Optional)
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -210,10 +243,10 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
               <select
                 {...register('categoryId')}
                 disabled={isLoadingCategories}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black dark:text-white dark:bg-gray-700 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 <option value="">
-                  {isLoadingCategories ? 'Loading categories...' : 'Select a category'}
+                  {isLoadingCategories ? 'Loading categories...' : 'All Categories'}
                 </option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -222,27 +255,25 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
                 ))}
               </select>
             </div>
-            {categories.length === 0 && !isLoadingCategories && (
-              <p className="text-yellow-600 text-sm mt-1">
-                No categories available. Please contact support.
-              </p>
-            )}
+            <p className="text-gray-500 text-sm mt-1">
+              Leave empty to apply to all categories
+            </p>
           </div>
 
           <div className="flex space-x-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 dark:bg-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Adding...' : 'Add Expense'}
+              {isLoading ? (budget ? 'Updating...' : 'Creating...') : (budget ? 'Update Budget' : 'Create Budget')}
             </button>
           </div>
         </form>

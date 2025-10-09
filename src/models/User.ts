@@ -5,6 +5,7 @@ export interface IUser extends Document {
   name: string
   email: string
   password?: string // Make password optional for OAuth users
+  currency: string
   createdAt: Date
   updatedAt: Date
 }
@@ -25,6 +26,11 @@ const UserSchema = new Schema<IUser>({
   password: {
     type: String,
     required: false, // Make password optional
+  },
+  currency: {
+    type: String,
+    required: true,
+    default: 'BDT',
   },
 }, {
   timestamps: true,

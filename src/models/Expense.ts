@@ -6,6 +6,7 @@ export interface IExpense extends Document {
   description?: string
   date: Date
   categoryId?: string
+  tags?: string[]
   userId: string
   createdAt: Date
   updatedAt: Date
@@ -30,6 +31,10 @@ const ExpenseSchema = new Schema<IExpense>({
     type: String,
     ref: 'Category',
   },
+  tags: [{
+    type: String,
+    ref: 'Tag',
+  }],
   userId: {
     type: String,
     required: true,

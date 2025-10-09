@@ -1,31 +1,135 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Force dark mode to work by adding explicit styles */
+.dark {
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Explicit background color overrides */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-spline-sans-mono), monospace;
+  background-color: #f9fafb; /* bg-gray-50 */
+  color: #111827; /* text-gray-900 */
 }
 
-/* Ensure all input text is black */
+.dark body {
+  background-color: #111827 !important; /* dark:bg-gray-900 */
+  color: #f9fafb !important; /* dark:text-gray-100 */
+}
+
+/* Force main container backgrounds */
+.min-h-screen {
+  background-color: #f9fafb; /* bg-gray-50 */
+}
+
+.dark .min-h-screen {
+  background-color: #111827 !important; /* dark:bg-gray-900 */
+}
+
+/* Force header backgrounds */
+header {
+  background-color: #ffffff; /* bg-white */
+}
+
+.dark header {
+  background-color: #1f2937 !important; /* dark:bg-gray-800 */
+}
+
+/* Force card backgrounds */
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+.dark .bg-white {
+  background-color: #1f2937 !important; /* dark:bg-gray-800 */
+}
+
+/* Force specific background classes */
+.bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #111827 !important; /* dark:bg-gray-900 */
+}
+
+.bg-gray-800 {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-gray-800 {
+  background-color: #1f2937 !important;
+}
+
+/* Force text colors */
+.text-gray-900 {
+  color: #111827 !important;
+}
+
+.dark .text-gray-900 {
+  color: #f9fafb !important; /* dark:text-gray-100 */
+}
+
+.text-gray-100 {
+  color: #f3f4f6 !important;
+}
+
+.dark .text-gray-100 {
+  color: #f3f4f6 !important;
+}
+
+/* Navigation hover colors */
+.hover\:text-red-600:hover {
+  color: #dc2626 !important; /* text-red-600 */
+}
+
+.dark .hover\:text-red-400:hover {
+  color: #f87171 !important; /* text-red-400 */
+}
+
+.hover\:text-blue-600:hover {
+  color: #2563eb !important; /* text-blue-600 */
+}
+
+.dark .hover\:text-blue-400:hover {
+  color: #60a5fa !important; /* text-blue-400 */
+}
+
+/* Font utility classes */
+.font-spline-mono {
+  font-family: var(--font-spline-sans-mono), monospace;
+  font-weight: 400;
+}
+
+.font-sofia-condensed {
+  font-family: var(--font-sofia-sans-condensed), sans-serif;
+  font-weight: 700;
+}
+
+/* Headers use Sofia Sans Condensed */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sofia-sans-condensed), sans-serif;
+  font-weight: 700;
+}
+
+/* Body text uses Spline Sans Mono */
+p,
+span,
+div,
+input,
+textarea,
+select,
+button {
+  font-family: var(--font-spline-sans-mono), monospace;
+  font-weight: 400;
+}
+
+/* Light mode inputs - white background with black text */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -36,10 +140,32 @@ input[type="url"],
 textarea,
 select {
   color: #000000 !important;
+  background-color: #ffffff !important;
+  border-color: #d1d5db !important; /* border-gray-300 */
 }
 
-/* Ensure input placeholders are visible but not too dark */
+/* Dark mode inputs - dark background with light text */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="date"],
+.dark input[type="tel"],
+.dark input[type="url"],
+.dark textarea,
+.dark select {
+  color: #ffffff !important;
+  background-color: #374151 !important; /* bg-gray-700 */
+  border-color: #4b5563 !important; /* border-gray-600 */
+}
+
+/* Ensure input placeholders are visible */
 input::placeholder,
 textarea::placeholder {
-  color: #6b7280 !important;
+  color: #6b7280 !important; /* text-gray-500 */
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9ca3af !important; /* text-gray-400 */
 }

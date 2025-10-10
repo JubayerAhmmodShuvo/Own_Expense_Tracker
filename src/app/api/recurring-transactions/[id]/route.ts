@@ -41,14 +41,16 @@ function calculateNextDueDate(startDate: Date, frequency: string): Date {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await requireAuth()
+    const { id } = await params
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const recurringTransaction = await RecurringTransaction.findOne({
-      _id: params.id,
+      _id: id,
       userId,
     }).populate('categoryId', 'name color')
 
@@ -95,10 +97,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await requireAuth()
+    const { id } = await params
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const body = await request.json()
@@ -106,16 +110,21 @@ export async function PUT(
 
     // If frequency or startDate is being updated, recalculate nextDueDate
     if (updateData.frequency || updateData.startDate) {
-      const existingTransaction = await RecurringTransaction.findById(params.id)
+      const existingTransaction = await RecurringTransaction.findById(id)
       if (existingTransaction) {
         const frequency = updateData.frequency || existingTransaction.frequency
-        const startDate = updateData.startDate ? new Date(updateData.startDate) : existingTransaction.startDate
-        updateData.nextDueDate = calculateNextDueDate(startDate, frequency)
+        let startDate: Date
+        if (updateData.startDate) {
+          startDate = new Date(updateData.startDate)
+        } else {
+          startDate = existingTransaction.startDate
+        }
+        (updateData as Record<string, unknown>).nextDueDate = calculateNextDueDate(startDate, frequency)
       }
     }
 
     const recurringTransaction = await RecurringTransaction.findOneAndUpdate(
-      { _id: params.id, userId },
+      { _id: id, userId },
       updateData,
       { new: true, runValidators: true }
     ).populate('categoryId', 'name color')
@@ -170,14 +179,16 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await requireAuth()
+    const { id } = await params
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const recurringTransaction = await RecurringTransaction.findOneAndDelete({
-      _id: params.id,
+      _id: id,
       userId,
     })
 

@@ -28,8 +28,8 @@ export const metadata: Metadata = {
     title: "Expense Tracker",
   },
   icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
+    icon: "/icons/icon-144x144.svg",
+    apple: "/icons/icon-144x144.svg",
   },
 };
 

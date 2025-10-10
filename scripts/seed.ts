@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs'
 
 async function seedDatabase() {
   try {
-    console.log('Starting database seed...')
+    // console.log('Starting database seed...')
     
     await connectDB()
 
@@ -25,7 +25,7 @@ async function seedDatabase() {
       password: hashedPassword,
     })
 
-    console.log('Created demo user:', demoUser.email)
+    // console.log('Created demo user:', demoUser.email)
 
     // Create default categories
     const defaultCategories = [
@@ -46,7 +46,7 @@ async function seedDatabase() {
       }))
     )
 
-    console.log('Created default categories')
+    // console.log('Created default categories')
 
     // Create sample expenses
     const sampleExpenses = [
@@ -88,7 +88,7 @@ async function seedDatabase() {
     ]
 
     await Expense.insertMany(sampleExpenses)
-    console.log('Created sample expenses')
+    // console.log('Created sample expenses')
 
     // Create sample income
     const sampleIncome = {
@@ -100,12 +100,12 @@ async function seedDatabase() {
     }
 
     await Income.create(sampleIncome)
-    console.log('Created sample income')
+    // console.log('Created sample income')
 
-    console.log('Database seed completed successfully!')
-    console.log('\nDemo account credentials:')
-    console.log('Email: demo@example.com')
-    console.log('Password: demo123')
+    //  console.log('Database seed completed successfully!')
+    // console.log('\nDemo account credentials:')
+    // console.log('Email: demo@example.com')
+    // console.log('Password: demo123')
 
   } catch (error) {
     console.error('Error seeding database:', error)

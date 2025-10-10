@@ -22,7 +22,7 @@ export async function DELETE(request: NextRequest) {
     await connectDB()
 
     const body = await request.json()
-    const { confirmation } = deleteAccountSchema.parse(body)
+    const { confirmation: _confirmation } = deleteAccountSchema.parse(body)
 
     // Delete all user data
     await Promise.all([

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Zap, Coffee, Car, ShoppingCart, Utensils, Home, Gamepad2 } from 'lucide-react'
+import { Zap, Coffee, Car, ShoppingCart, Utensils, Home, Gamepad2 } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 
 interface QuickAddProps {
@@ -116,7 +116,7 @@ export default function QuickAdd({ onExpenseAdded, currency = 'BDT' }: QuickAddP
 
       <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
         <p className="text-sm text-blue-700 dark:text-blue-300">
-          <strong>Tip:</strong> Quick add buttons create expenses with today's date. You can edit them later to change the amount, category, or date.
+          <strong>Tip:</strong> Quick add buttons create expenses with today&apos;s date. You can edit them later to change the amount, category, or date.
         </p>
       </div>
     </div>

@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Search, Filter, X, Calendar, DollarSign, FileText } from 'lucide-react'
-import { formatCurrency } from '@/lib/currency'
+import { Search, Filter, X } from 'lucide-react'
 
 interface Transaction {
   id: string

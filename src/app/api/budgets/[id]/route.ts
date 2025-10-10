@@ -14,14 +14,16 @@ const budgetUpdateSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await requireAuth()
+    const { id } = await params
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const budget = await Budget.findOne({
-      _id: params.id,
+      _id: id,
       userId,
     }).populate('categoryId', 'name color')
 
@@ -62,17 +64,19 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await requireAuth()
+    const { id } = await params
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const body = await request.json()
     const updateData = budgetUpdateSchema.parse(body)
 
     const budget = await Budget.findOneAndUpdate(
-      { _id: params.id, userId },
+      { _id: id, userId },
       updateData,
       { new: true, runValidators: true }
     ).populate('categoryId', 'name color')
@@ -121,14 +125,16 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await requireAuth()
+    const { id } = await params
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const budget = await Budget.findOneAndDelete({
-      _id: params.id,
+      _id: id,
       userId,
     })
 

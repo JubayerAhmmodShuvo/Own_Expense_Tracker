@@ -48,9 +48,9 @@ export default function OfflinePage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-lg p-8 text-center max-w-md w-full">
         <WifiOff className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">You're Offline</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">You&apos;re Offline</h1>
         <p className="text-gray-600 mb-6">
-          It looks like you've lost your internet connection. Don't worry, you can still view your cached data.
+          It looks like you&apos;ve lost your internet connection. Don&apos;t worry, you can still view your cached data.
         </p>
         
         <div className="space-y-4">

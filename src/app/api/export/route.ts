@@ -3,7 +3,6 @@ import { requireAuth } from '@/lib/auth-utils'
 import connectDB from '@/lib/mongodb'
 import Expense from '@/models/Expense'
 import Income from '@/models/Income'
-import Category from '@/models/Category'
 
 export async function GET(request: NextRequest) {
   try {

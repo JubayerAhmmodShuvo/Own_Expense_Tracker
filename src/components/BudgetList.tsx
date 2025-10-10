@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 import BudgetForm from './BudgetForm'
-import DeleteConfirmationModal from './DeleteConfirmationModal'
+import GenericDeleteModal from './GenericDeleteModal'
 
 interface Budget {
   id: string
@@ -53,6 +53,10 @@ export default function BudgetList() {
       if (response.ok) {
         const data = await response.json()
         setBudgets(data)
+      } else if (response.status === 401) {
+        // Handle unauthorized - don't show error toast for auth issues
+        // console.log('User not authenticated for budgets')
+        setBudgets([])
       } else {
         console.error('Failed to fetch budgets:', response.status)
         addToast({
@@ -304,7 +308,7 @@ export default function BudgetList() {
 
       {/* Delete Confirmation Modal */}
       {deleteBudget && (
-        <DeleteConfirmationModal
+        <GenericDeleteModal
           isOpen={!!deleteBudget}
           onClose={() => setDeleteBudget(null)}
           onConfirm={() => handleDeleteBudget(deleteBudget.id)}

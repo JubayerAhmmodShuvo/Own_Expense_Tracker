@@ -6,7 +6,8 @@ import Income from '@/models/Income'
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const { searchParams } = new URL(request.url)

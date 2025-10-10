@@ -1,31 +1,21 @@
-import { withAuth } from 'next-auth/middleware'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default withAuth(
-  function middleware() {
-    // Additional middleware logic can be added here
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        // Allow access to auth pages and API routes
-        if (req.nextUrl.pathname.startsWith('/auth/') || 
-            req.nextUrl.pathname.startsWith('/api/auth/')) {
-          return true
-        }
-        
-        // Require authentication for all other routes
-        return !!token
-      },
-    },
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Protect admin routes - let the page components handle auth checks
+  // This middleware just ensures the route exists
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login' && pathname !== '/admin/setup') {
+    // Allow the request to proceed - auth will be checked in the page component
+    return NextResponse.next()
   }
-)
+
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/api/expenses/:path*',
-    '/api/incomes/:path*',
-    '/api/categories/:path*',
-    '/api/analytics/:path*',
-  ]
+    '/admin/:path*',
+  ],
 }

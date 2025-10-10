@@ -34,16 +34,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return
 
-    console.log('Applying theme:', theme)
+    // console.log('Applying theme:', theme)
     
     // Apply theme to document
     const root = document.documentElement
     if (theme === 'dark') {
       root.classList.add('dark')
-      console.log('Added dark class to document')
+      // console.log('Added dark class to document')
     } else {
       root.classList.remove('dark')
-      console.log('Removed dark class from document')
+      // console.log('Removed dark class from document')
     }
     
     // Save to localStorage
@@ -52,18 +52,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Force a re-render by updating a data attribute
     root.setAttribute('data-theme', theme)
     
-    console.log('Document classes after change:', root.className)
-    console.log('Document data-theme:', root.getAttribute('data-theme'))
+    // console.log('Document classes after change:', root.className)
+    // console.log('Document data-theme:', root.getAttribute('data-theme'))
     
     // Force body background change
     document.body.style.backgroundColor = theme === 'dark' ? '#111827' : '#f9fafb'
-    console.log('Body background set to:', document.body.style.backgroundColor)
+    // console.log('Body background set to:', document.body.style.backgroundColor)
   }, [theme, mounted])
 
   const toggleTheme = () => {
     setThemeState(prev => {
       const newTheme = prev === 'light' ? 'dark' : 'light'
-      console.log('Theme changing from', prev, 'to', newTheme)
+      // console.log('Theme changing from', prev, 'to', newTheme)
       return newTheme
     })
   }

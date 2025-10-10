@@ -13,7 +13,8 @@ const expenseSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const { searchParams } = new URL(request.url)
@@ -135,11 +136,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const body = await request.json()
-    console.log('Expense API received data:', body)
+    // console.log('Expense API received data:', body)
     const { amount, description, date, categoryId } = expenseSchema.parse(body)
 
     // Parse date - handle both YYYY-MM-DD and ISO datetime formats

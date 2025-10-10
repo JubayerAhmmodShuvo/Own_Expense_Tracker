@@ -3,6 +3,7 @@ import GoogleProvider from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
 import connectDB from '@/lib/mongodb'
 import User from '@/models/User'
+import Admin from '@/models/Admin'
 import Category from '@/models/Category'
 import { Session } from 'next-auth'
 
@@ -33,6 +34,30 @@ export const authOptions: NextAuthOptions = {
 
         await connectDB()
 
+        // First check if it's an admin user
+        const admin = await Admin.findOne({
+          email: credentials.email.toLowerCase().trim(),
+          isActive: true
+        })
+
+          // console.log('Auth - Admin found:', admin ? 'Yes' : 'No')
+          // console.log('Auth - Email:', credentials.email.toLowerCase().trim())
+
+        if (admin) {
+          const isPasswordValid = await admin.comparePassword(credentials.password)
+          // console.log('Auth - Admin password valid:', isPasswordValid)
+          if (isPasswordValid) {
+            // console.log('Auth - Returning admin user')
+            return {
+              id: admin._id.toString(),
+              email: admin.email,
+              name: admin.name,
+              role: admin.role // Use the actual role from database
+            }
+          }
+        }
+
+        // If not admin, check regular users
         const user = await User.findOne({
           email: credentials.email
         })
@@ -54,6 +79,7 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
+          role: 'user'
         }
       }
     })
@@ -73,7 +99,7 @@ export const authOptions: NextAuthOptions = {
           if (existingUser) {
             // If user exists with a password (manual account), prevent OAuth sign-in
             if (existingUser.password && existingUser.password.trim() !== '') {
-              console.log('User already exists with manual account, preventing OAuth sign-in')
+              // console.log('User already exists with manual account, preventing OAuth sign-in')
               return false
             }
             // If user exists without password (OAuth account), allow sign-in
@@ -115,8 +141,13 @@ export const authOptions: NextAuthOptions = {
       return true
     },
         async jwt({ token, user, account }: { token: any; user: any; account: any }) {
+      // console.log('JWT callback - user:', user)
+      // console.log('JWT callback - token before:', token)
+      
       if (user) {
         token.id = user.id
+        token.role = user.role
+        // console.log('JWT callback - setting role:', user.role)
       }
       
       // For Google OAuth, get user ID from database
@@ -126,18 +157,26 @@ export const authOptions: NextAuthOptions = {
           const dbUser = await User.findOne({ email: user.email })
           if (dbUser) {
             token.id = dbUser._id.toString()
+            token.role = 'user'
           }
         } catch (error) {
           console.error('Error getting user ID for Google OAuth:', error)
         }
       }
       
+      // console.log('JWT callback - token after:', token)
       return token
     },
         async session({ session, token }: { session: Session; token: any }): Promise<Session> {
+      // console.log('Session callback - token:', token)
+      // console.log('Session callback - session before:', session)
+      
       if (token && session.user) {
         (session.user as { id: string }).id = token.id as string
+        ;(session.user as { role: string }).role = token.role as string
       }
+      
+      // console.log('Session callback - session after:', session)
       return session
     }
   },

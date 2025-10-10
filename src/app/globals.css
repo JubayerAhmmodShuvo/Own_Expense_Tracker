@@ -95,6 +95,14 @@ header {
   color: #60a5fa !important; /* text-blue-400 */
 }
 
+.hover\:text-purple-600:hover {
+  color: #9333ea !important; /* text-purple-600 */
+}
+
+.dark .hover\:text-purple-400:hover {
+  color: #a78bfa !important; /* text-purple-400 */
+}
+
 /* Font utility classes */
 .font-spline-mono {
   font-family: var(--font-spline-sans-mono), monospace;

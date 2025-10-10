@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Trash2, AlertTriangle, TrendingUp, DollarSign } from 'lucide-react'
+import { Plus, Trash2, AlertTriangle, DollarSign } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 import { formatCurrency } from '@/lib/currency'
 

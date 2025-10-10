@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-utils'
 import connectDB from '@/lib/mongodb'
 import RecurringTransaction from '@/models/RecurringTransaction'
-import Expense from '@/models/Expense'
-import Income from '@/models/Income'
 import { z } from 'zod'
 
 const recurringTransactionSchema = z.object({
@@ -42,7 +40,8 @@ function calculateNextDueDate(startDate: Date, frequency: string): Date {
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const { searchParams } = new URL(request.url)
@@ -102,7 +101,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const body = await request.json()

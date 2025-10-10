@@ -34,13 +34,13 @@ interface RecurringTransactionFormProps {
     id: string
     name: string
     amount: number
-    description?: string
+    description?: string | null
     type: 'expense' | 'income'
     frequency: 'daily' | 'weekly' | 'monthly' | 'yearly'
-    categoryId?: string
-    source?: string
-    startDate: string
-    endDate?: string
+    categoryId?: string | null
+    source?: string | null
+    startDate: string | Date
+    endDate?: string | Date | null
   } | null
 }
 
@@ -120,8 +120,14 @@ export default function RecurringTransactionForm({
         frequency: recurringTransaction.frequency,
         categoryId: recurringTransaction.categoryId || '',
         source: recurringTransaction.source || '',
-        startDate: recurringTransaction.startDate.split('T')[0],
-        endDate: recurringTransaction.endDate ? recurringTransaction.endDate.split('T')[0] : '',
+        startDate: typeof recurringTransaction.startDate === 'string' 
+          ? recurringTransaction.startDate.split('T')[0]
+          : recurringTransaction.startDate.toISOString().split('T')[0],
+        endDate: recurringTransaction.endDate 
+          ? (typeof recurringTransaction.endDate === 'string' 
+              ? recurringTransaction.endDate.split('T')[0] 
+              : recurringTransaction.endDate.toISOString().split('T')[0]) 
+          : '',
       })
     }
   }, [recurringTransaction, reset, fetchCategories])

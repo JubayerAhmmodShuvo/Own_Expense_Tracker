@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
             name: expense.categoryId.name,
             color: expense.categoryId.color,
           } : null,
-          tags: expense.tags?.map(tag => ({
+          tags: expense.tags?.map((tag: { _id: { toString(): string }; name: string; color: string }) => ({
             id: tag._id.toString(),
             name: tag.name,
             color: tag.color,
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
           description: income.description,
           source: income.source,
           date: income.date,
-          tags: income.tags?.map(tag => ({
+          tags: income.tags?.map((tag: { _id: { toString(): string }; name: string; color: string }) => ({
             id: tag._id.toString(),
             name: tag.name,
             color: tag.color,
@@ -157,13 +157,13 @@ export async function GET(request: NextRequest) {
       
       // Add expenses
       expenses.forEach(expense => {
-        const tags = expense.tags?.map(tag => tag.name).join(';') || ''
+        const tags = expense.tags?.map((tag: { name: string }) => tag.name).join(';') || ''
         csvContent += `Expense,${expense._id},${expense.amount},"${expense.description || ''}",${expense.date.toISOString().split('T')[0]},${expense.categoryId?.name || ''},,"${tags}"\n`
       })
       
       // Add incomes
       incomes.forEach(income => {
-        const tags = income.tags?.map(tag => tag.name).join(';') || ''
+        const tags = income.tags?.map((tag: { name: string }) => tag.name).join(';') || ''
         csvContent += `Income,${income._id},${income.amount},"${income.description || ''}",${income.date.toISOString().split('T')[0]},,${income.source || ''},"${tags}"\n`
       })
 

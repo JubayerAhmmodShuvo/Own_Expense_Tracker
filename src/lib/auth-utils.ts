@@ -7,10 +7,15 @@ export async function getUserId(): Promise<string | null> {
   return (session?.user as { id?: string })?.id || null
 }
 
-export async function requireAuth(): Promise<string> {
-  const userId = await getUserId()
-  if (!userId) {
+export async function requireAuth() {
+  // @ts-expect-error - NextAuth v4 type compatibility issue
+  const session = await getServerSession(authOptions)
+  if (!session?.user) {
     throw new Error('Unauthorized')
   }
-  return userId
+  
+      // console.log('requireAuth - Raw session:', session)
+      // console.log('requireAuth - Session user:', session.user)
+  
+  return session
 }

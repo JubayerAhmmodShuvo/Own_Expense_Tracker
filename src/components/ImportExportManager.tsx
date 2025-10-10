@@ -5,7 +5,6 @@ import {
   Download, 
   Upload, 
   FileText, 
-  Calendar,
   AlertCircle,
   CheckCircle,
   X
@@ -45,7 +44,7 @@ export default function ImportExportManager() {
         a.href = url
         
         const filename = response.headers.get('Content-Disposition')
-          ?.split('filename=')[1]?.replace(/"/g, '') || `${type}.${format}`
+          ?.split('filename=')[1]?.replace(/&quot;/g, '') || `${type}.${format}`
         
         a.download = filename
         document.body.appendChild(a)
@@ -307,7 +306,7 @@ export default function ImportExportManager() {
                 <li>• Optional columns: description, category, source, type</li>
                 <li>• Date format: YYYY-MM-DD or MM/DD/YYYY</li>
                 <li>• Amount should be numeric (no currency symbols)</li>
-                <li>• Type should be "expense" or "income" (defaults to expense)</li>
+                <li>• Type should be &quot;expense&quot; or &quot;income&quot; (defaults to expense)</li>
               </ul>
             </div>
           </div>

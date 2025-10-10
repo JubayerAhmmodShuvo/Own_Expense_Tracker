@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, FileText, Loader2 } from 'lucide-react'
+import { Printer, Loader2 } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 
 interface PDFExportProps {
@@ -33,28 +33,34 @@ export default function PDFExport({ period, customDateRange }: PDFExportProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to generate PDF')
       }
 
       const data = await response.json()
       
-      // Create a blob from the HTML content
-      const blob = new Blob([data.pdfContent], { type: 'text/html' })
-      const url = window.URL.createObjectURL(blob)
-      
-      // Create a temporary link to download the file
-      const link = document.createElement('a')
-      link.href = url
-      link.download = data.filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      // Create a new window with the HTML content
+      const printWindow = window.open('', '_blank')
+      if (!printWindow) {
+        throw new Error('Unable to open print window. Please allow popups.')
+      }
+
+      // Write the HTML content to the new window
+      printWindow.document.write(data.htmlContent)
+      printWindow.document.close()
+
+      // Wait for the content to load, then trigger print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print()
+          printWindow.close()
+        }, 500)
+      }
 
       addToast({
         type: 'success',
-        title: 'PDF Generated',
-        message: 'Your expense report has been downloaded successfully!',
+        title: 'PDF Ready',
+        message: 'Your expense report is ready to print/save as PDF!',
       })
 
     } catch (error) {
@@ -62,7 +68,7 @@ export default function PDFExport({ period, customDateRange }: PDFExportProps) {
       addToast({
         type: 'error',
         title: 'Export Failed',
-        message: 'Failed to generate PDF report. Please try again.',
+        message: error instanceof Error ? error.message : 'Failed to generate PDF report. Please try again.',
       })
     } finally {
       setIsGenerating(false)
@@ -73,12 +79,12 @@ export default function PDFExport({ period, customDateRange }: PDFExportProps) {
     <button
       onClick={handlePDFExport}
       disabled={isGenerating}
-      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600"
     >
       {isGenerating ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
-        <FileText className="h-4 w-4" />
+        <Printer className="h-4 w-4" />
       )}
       <span>{isGenerating ? 'Generating...' : 'Export PDF'}</span>
     </button>

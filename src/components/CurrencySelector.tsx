@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Globe, Check } from 'lucide-react'
-import { getAllCurrencies, formatCurrency } from '@/lib/currency'
+import { getAllCurrencies } from '@/lib/currency'
 import { useToast } from '@/components/Toast'
 
 interface CurrencySelectorProps {

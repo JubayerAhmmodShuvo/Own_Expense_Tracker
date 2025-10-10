@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Shield, Lock, Eye, Database, Download, Upload, Trash2, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/components/Toast'
-import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
 
 export default function PrivacyPage() {
   const [isExporting, setIsExporting] = useState(false)
@@ -168,7 +167,7 @@ export default function PrivacyPage() {
               <div className="text-center p-4 bg-blue-50 rounded-lg">
                 <Eye className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                 <h3 className="font-semibold text-blue-900">No Tracking</h3>
-                <p className="text-sm text-blue-700">We don't track you or sell your data</p>
+                <p className="text-sm text-blue-700">We don&apos;t track you or sell your data</p>
               </div>
               
               <div className="text-center p-4 bg-purple-50 rounded-lg">
@@ -301,7 +300,7 @@ export default function PrivacyPage() {
             <h3 className="font-medium text-red-900 mb-2">We Never Share Your Financial Data</h3>
             <p className="text-sm text-red-700">
               Your financial information is never shared with third parties, advertisers, or marketing companies. 
-              We don't sell your data or use it for advertising purposes.
+              We don&apos;t sell your data or use it for advertising purposes.
             </p>
           </div>
           
@@ -379,7 +378,7 @@ export default function PrivacyPage() {
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Type "DELETE" to confirm:
+                  Type &quot;DELETE&quot; to confirm:
                 </label>
                 <input
                   type="text"

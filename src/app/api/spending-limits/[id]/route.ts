@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireAuth } from '@/lib/auth-utils'
 import SpendingLimit from '@/models/SpendingLimit'
 import connectDB from '@/lib/mongodb'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const { id } = await params
+    const session = await requireAuth() as { user?: { id: string } }
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -17,7 +17,7 @@ export async function DELETE(
     await connectDB()
 
     const spendingLimit = await SpendingLimit.findOneAndDelete({
-      _id: params.id,
+      _id: id,
       userId: session.user.id
     })
 

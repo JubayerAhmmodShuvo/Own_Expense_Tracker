@@ -8,7 +8,8 @@ import connectDB from '@/lib/mongodb'
 
 export async function GET() {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const now = new Date()

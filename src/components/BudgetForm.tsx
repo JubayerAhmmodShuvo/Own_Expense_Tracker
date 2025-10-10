@@ -30,7 +30,7 @@ interface BudgetFormProps {
     name: string
     amount: number
     period: 'monthly' | 'weekly' | 'yearly'
-    categoryId?: string
+    categoryId?: string | null
   } | null
 }
 

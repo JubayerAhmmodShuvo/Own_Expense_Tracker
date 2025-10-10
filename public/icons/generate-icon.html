@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Icon Generator</title>
+  </head>
+  <body>
+    <canvas
+      id="canvas"
+      width="144"
+      height="144"
+      style="border: 1px solid #ccc"
+    ></canvas>
+    <br />
+    <button onclick="downloadIcon()">Download Icon</button>
+
+    <script>
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Draw background
+      ctx.fillStyle = "#2563eb";
+      ctx.fillRect(0, 0, 144, 144);
+
+      // Draw circle
+      ctx.fillStyle = "white";
+      ctx.beginPath();
+      ctx.arc(72, 72, 48, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Draw inner circle
+      ctx.fillStyle = "#2563eb";
+      ctx.beginPath();
+      ctx.arc(72, 72, 36, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Draw dollar sign
+      ctx.fillStyle = "white";
+      ctx.font = "bold 48px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("$", 72, 72);
+
+      function downloadIcon() {
+        const link = document.createElement("a");
+        link.download = "icon-144x144.png";
+        link.href = canvas.toDataURL();
+        link.click();
+      }
+    </script>
+  </body>
+</html>

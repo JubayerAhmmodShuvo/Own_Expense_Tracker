@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
@@ -12,7 +12,8 @@ import {
   Plus,
   Filter,
   LogOut,
-  Shield
+  Shield,
+  Settings
 } from 'lucide-react'
 import ExpenseForm from '@/components/ExpenseForm'
 import IncomeForm from '@/components/IncomeForm'
@@ -143,9 +144,11 @@ export default function Dashboard() {
     }
   }, [fetchAnalytics])
 
-  const handleSignOut = async () => {
-    await fetch('/api/auth/signout', { method: 'POST' })
-    router.push('/auth/signin')
+  const handleSignOut = () => {
+    signOut({ 
+      callbackUrl: '/auth/signin',
+      redirect: true 
+    })
   }
 
   const handlePeriodChange = (newPeriod: string) => {
@@ -204,6 +207,15 @@ export default function Dashboard() {
                 <Shield className="h-5 w-5" />
                 <span>Privacy</span>
               </Link>
+              {(session.user as { role?: string })?.role === 'admin' || (session.user as { role?: string })?.role === 'super_admin' ? (
+                <Link
+                  href="/admin/login"
+                  className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400 transition-colors"
+                >
+                  <Settings className="h-5 w-5" />
+                  <span>Admin</span>
+                </Link>
+              ) : null}
               <button
                 onClick={handleSignOut}
                 className="flex items-center space-x-2 text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 transition-colors"

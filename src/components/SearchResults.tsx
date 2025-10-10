@@ -93,11 +93,11 @@ export default function SearchResults({ transactions, currency = 'BDT', onEdit, 
                   }`}>
                     {transaction.type === 'income' ? (
                       <TrendingUp className={`h-4 w-4 ${
-                        transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                        (transaction.type as string) === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                       }`} />
                     ) : (
                       <TrendingDown className={`h-4 w-4 ${
-                        transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                        (transaction.type as string) === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                       }`} />
                     )}
                   </div>

@@ -14,7 +14,8 @@ const createSpendingLimitSchema = z.object({
 
 export async function GET() {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const spendingLimits = await SpendingLimit.find({ 
@@ -64,7 +65,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id: string } }
+    const userId = session.user?.id
     await connectDB()
 
     const body = await request.json()

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/components/Toast'
 import RecurringTransactionForm from './RecurringTransactionForm'
-import DeleteConfirmationModal from './DeleteConfirmationModal'
+import GenericDeleteModal from './GenericDeleteModal'
 
 interface RecurringTransaction {
   id: string
@@ -56,6 +56,10 @@ export default function RecurringTransactionList() {
       if (response.ok) {
         const data = await response.json()
         setRecurringTransactions(data)
+      } else if (response.status === 401) {
+        // Handle unauthorized - don't show error toast for auth issues
+        // console.log('User not authenticated for recurring transactions')
+        setRecurringTransactions([])
       } else {
         console.error('Failed to fetch recurring transactions:', response.status)
         addToast({
@@ -215,9 +219,9 @@ export default function RecurringTransactionList() {
     return type === 'expense' ? 'text-red-600' : 'text-green-600'
   }
 
-  const getTypeIcon = (type: string) => {
-    return type === 'expense' ? 'text-red-500' : 'text-green-500'
-  }
+  // const getTypeIcon = (type: string) => {
+  //   return type === 'expense' ? 'text-red-500' : 'text-green-500'
+  // }
 
   const isDueToday = (nextDueDate: Date) => {
     const today = new Date()
@@ -412,7 +416,7 @@ export default function RecurringTransactionList() {
 
       {/* Delete Confirmation Modal */}
       {deleteTransaction && (
-        <DeleteConfirmationModal
+        <GenericDeleteModal
           isOpen={!!deleteTransaction}
           onClose={() => setDeleteTransaction(null)}
           onConfirm={() => handleDeleteTransaction(deleteTransaction.id)}

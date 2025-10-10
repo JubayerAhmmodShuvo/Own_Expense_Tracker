@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireAuth } from '@/lib/auth-utils'
 import Expense from '@/models/Expense'
 import Income from '@/models/Income'
 import connectDB from '@/lib/mongodb'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await requireAuth() as { user?: { id: string } }
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -23,8 +22,8 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type')
 
     // Build query conditions
-    const expenseQuery: any = { userId: session.user.id }
-    const incomeQuery: any = { userId: session.user.id }
+    const expenseQuery: Record<string, unknown> = { userId: session.user.id }
+    const incomeQuery: Record<string, unknown> = { userId: session.user.id }
 
     // Add search term
     if (search) {
@@ -41,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     // Add amount filters
     if (minAmount || maxAmount) {
-      const amountQuery: any = {}
+      const amountQuery: Record<string, number> = {}
       if (minAmount) amountQuery.$gte = parseFloat(minAmount)
       if (maxAmount) amountQuery.$lte = parseFloat(maxAmount)
       
@@ -51,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     // Add date filters
     if (startDate || endDate) {
-      const dateQuery: any = {}
+      const dateQuery: Record<string, Date> = {}
       if (startDate) dateQuery.$gte = new Date(startDate)
       if (endDate) dateQuery.$lte = new Date(endDate)
       
@@ -59,8 +58,8 @@ export async function GET(request: NextRequest) {
       incomeQuery.date = dateQuery
     }
 
-    let expenses: any[] = []
-    let incomes: any[] = []
+    let expenses: Array<{ _id: string; amount: number; description: string; date: Date; type: string; categoryId?: { _id: { toString(): string }; name: string; color: string } }> = []
+    let incomes: Array<{ _id: string; amount: number; description: string; date: Date; type: string; source?: string }> = []
 
     // Fetch based on type filter
     if (!type || type === 'all' || type === 'expense') {

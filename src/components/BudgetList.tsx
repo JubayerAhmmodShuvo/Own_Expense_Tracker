@@ -220,13 +220,13 @@ export default function BudgetList() {
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setEditingBudget(budget)}
-                      className="p-1 text-gray-400 hover:text-blue-600"
+                      className="p-1 text-gray-400 hover:text-blue-600 cursor-pointer"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setDeleteBudget(budget)}
-                      className="p-1 text-gray-400 hover:text-red-600"
+                      className="p-1 text-gray-400 hover:text-red-600 cursor-pointer"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

@@ -139,7 +139,7 @@ export default function SearchResults({ transactions, currency = 'BDT', onEdit, 
                   {onEdit && (
                     <button
                       onClick={() => onEdit(transaction)}
-                      className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                       title="Edit transaction"
                     >
                       <Edit2 className="h-4 w-4" />
@@ -148,7 +148,7 @@ export default function SearchResults({ transactions, currency = 'BDT', onEdit, 
                   <button
                     onClick={() => handleDelete(transaction.id)}
                     disabled={deletingId === transaction.id}
-                    className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                    className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                     title="Delete transaction"
                   >
                     {deletingId === transaction.id ? (

@@ -335,20 +335,20 @@ export default function RecurringTransactionList() {
                     )}
                     <button
                       onClick={() => handleToggleActive(transaction.id, transaction.isActive)}
-                      className={`p-1 ${transaction.isActive ? 'text-gray-400 hover:text-yellow-600' : 'text-gray-400 hover:text-green-600'}`}
+                      className={`p-1 cursor-pointer ${transaction.isActive ? 'text-gray-400 hover:text-yellow-600' : 'text-gray-400 hover:text-green-600'}`}
                       title={transaction.isActive ? 'Pause Transaction' : 'Activate Transaction'}
                     >
                       {transaction.isActive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                     </button>
                     <button
                       onClick={() => setEditingTransaction(transaction)}
-                      className="p-1 text-gray-400 hover:text-blue-600"
+                      className="p-1 text-gray-400 hover:text-blue-600 cursor-pointer"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setDeleteTransaction(transaction)}
-                      className="p-1 text-gray-400 hover:text-red-600"
+                      className="p-1 text-gray-400 hover:text-red-600 cursor-pointer"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

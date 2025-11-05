@@ -166,7 +166,7 @@ export default function IncomeList({ period, currency = 'BDT', itemsPerPage = 5 
                 </span>
                 <button
                   onClick={() => handleDelete(income.id)}
-                  className="text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 transition-colors"
+                  className="text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 transition-colors cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

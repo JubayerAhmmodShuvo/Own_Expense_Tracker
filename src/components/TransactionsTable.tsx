@@ -291,20 +291,37 @@ export default function TransactionsTable({ onRefresh, period, customDateRange }
   const handleSaveEdit = async (updatedTransaction: Transaction) => {
     try {
       const endpoint = updatedTransaction.type === 'expense' ? '/api/expenses' : '/api/incomes'
+      
+      // Convert date string to ISO datetime format
+      const dateString = updatedTransaction.date
+      const dateISO = dateString.includes('T') 
+        ? dateString 
+        : new Date(dateString + 'T00:00:00.000Z').toISOString()
+      
+      // Prepare the request body
+      const requestBody: Record<string, unknown> = {
+        amount: updatedTransaction.amount,
+        description: updatedTransaction.description || undefined,
+        date: dateISO,
+      }
+
+      // Add type-specific fields only if they have values
+      if (updatedTransaction.type === 'expense') {
+        if (updatedTransaction.categoryId) {
+          requestBody.categoryId = updatedTransaction.categoryId
+        }
+      } else {
+        if (updatedTransaction.source) {
+          requestBody.source = updatedTransaction.source
+        }
+      }
+
       const response = await fetch(`${endpoint}/${updatedTransaction.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          amount: updatedTransaction.amount,
-          description: updatedTransaction.description,
-          date: updatedTransaction.date,
-          ...(updatedTransaction.type === 'expense' 
-            ? { categoryId: updatedTransaction.categoryId }
-            : { source: updatedTransaction.source }
-          ),
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       if (response.ok) {
@@ -351,17 +368,17 @@ export default function TransactionsTable({ onRefresh, period, customDateRange }
   }
 
   const getTypeColor = (type: 'expense' | 'income') => {
-    return type === 'expense' ? 'text-red-600' : 'text-green-600'
+    return type === 'expense' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
   }
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-12 bg-gray-200 rounded"></div>
+              <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
             ))}
           </div>
         </div>
@@ -371,22 +388,22 @@ export default function TransactionsTable({ onRefresh, period, customDateRange }
 
   if (transactions.length === 0 && !isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">All Transactions</h3>
-              <p className="text-sm text-gray-500">Manage your expenses and income</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">All Transactions</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Manage your expenses and income</p>
             </div>
             
             {/* Filter Controls */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <Filter className="h-4 w-4 text-gray-500" />
+                <Filter className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 <select
                   value={filter}
                   onChange={(e) => handleFilterChange(e.target.value as 'all' | 'expense' | 'income')}
-                  className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">All Transactions</option>
                   <option value="expense">Expenses Only</option>
@@ -399,14 +416,14 @@ export default function TransactionsTable({ onRefresh, period, customDateRange }
         
         <div className="p-6">
           <div className="text-center py-8">
-            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">
+            <FileText className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">
               {filter === 'all' 
                 ? 'No transactions found' 
                 : `No ${filter}s found`
               }
             </p>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-400 dark:text-gray-500">
               {filter === 'all' 
                 ? 'Add your first expense or income to get started' 
                 : `Try changing the filter or add a new ${filter}`
@@ -419,22 +436,22 @@ export default function TransactionsTable({ onRefresh, period, customDateRange }
   }
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">All Transactions</h3>
-            <p className="text-sm text-gray-500">Manage your expenses and income</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">All Transactions</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Manage your expenses and income</p>
           </div>
           
           {/* Filter Controls */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-gray-500" />
+              <Filter className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               <select
                 value={filter}
                 onChange={(e) => handleFilterChange(e.target.value as 'all' | 'expense' | 'income')}
-                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Transactions</option>
                 <option value="expense">Expenses Only</option>
@@ -445,7 +462,7 @@ export default function TransactionsTable({ onRefresh, period, customDateRange }
         </div>
         
         {/* Pagination Info */}
-        <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
+        <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
           <div>
             Showing {getPaginationInfo().startRecord} to {getPaginationInfo().endRecord} of {totalRecords} transactions
           </div>
@@ -456,36 +473,36 @@ export default function TransactionsTable({ onRefresh, period, customDateRange }
       </div>
       
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Type
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Amount
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Description
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Category/Source
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {transactions.map((transaction) => (
-              <tr key={`${transaction.type}-${transaction.id}`} className="hover:bg-gray-50">
+              <tr key={`${transaction.type}-${transaction.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     {getTypeIcon(transaction.type)}
-                    <span className="ml-2 text-sm font-medium capitalize">
+                    <span className="ml-2 text-sm font-medium capitalize text-gray-900 dark:text-white">
                       {transaction.type}
                     </span>
                   </div>
@@ -496,7 +513,7 @@ export default function TransactionsTable({ onRefresh, period, customDateRange }
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900 max-w-xs truncate">
+                  <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
                     {transaction.description || '-'}
                   </div>
                 </td>
@@ -508,30 +525,30 @@ export default function TransactionsTable({ onRefresh, period, customDateRange }
                           className="w-3 h-3 rounded-full mr-2"
                           style={{ backgroundColor: transaction.category.color }}
                         ></div>
-                        <span className="text-sm text-gray-900">{transaction.category.name}</span>
+                        <span className="text-sm text-gray-900 dark:text-white">{transaction.category.name}</span>
                       </div>
                     ) : (
-                      <span className="text-sm text-gray-400">No category</span>
+                      <span className="text-sm text-gray-400 dark:text-gray-500">No category</span>
                     )
                   ) : (
-                    <span className="text-sm text-gray-900">{transaction.source || '-'}</span>
+                    <span className="text-sm text-gray-900 dark:text-white">{transaction.source || '-'}</span>
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                   {formatDate(transaction.date)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleEdit(transaction)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
                       title="Edit"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(transaction)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 className="h-4 w-4" />

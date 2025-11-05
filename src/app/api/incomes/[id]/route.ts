@@ -16,7 +16,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id?: string } }
+    const userId = session.user?.id
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     await connectDB()
     const { id } = await params
 
@@ -59,7 +63,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id?: string } }
+    const userId = session.user?.id
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     await connectDB()
     const { id } = await params
 
@@ -129,7 +137,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await requireAuth()
+    const session = await requireAuth() as { user?: { id?: string } }
+    const userId = session.user?.id
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     await connectDB()
     const { id } = await params
 

@@ -234,7 +234,7 @@ export default function SpendingLimits({ currency = 'BDT' }: SpendingLimitsProps
                     )}
                     <button
                       onClick={() => handleDelete(limit.id)}
-                      className="text-gray-400 hover:text-red-600 transition-colors"
+                      className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

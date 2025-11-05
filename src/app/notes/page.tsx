@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { 
   Plus, 
   Search, 
@@ -15,9 +16,15 @@ import {
   Tag,
   Save,
   Palette,
-  Calendar
+  Calendar,
+  LogOut,
+  Shield,
+  Settings,
+  DollarSign
 } from 'lucide-react'
 import { useToast } from '@/components/Toast'
+import ThemeToggle from '@/components/ThemeToggle'
+import CurrencySelector from '@/components/CurrencySelector'
 import { format } from 'date-fns'
 
 interface Note {
@@ -53,6 +60,14 @@ export default function NotesPage() {
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState<string | null>(null)
+  const [userCurrency, setUserCurrency] = useState('BDT')
+
+  const handleSignOut = () => {
+    signOut({
+      callbackUrl: '/auth/signin',
+      redirect: true
+    })
+  }
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -224,8 +239,64 @@ export default function NotesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-sofia-condensed">Expense Tracker</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-spline-mono">Welcome back, {session.user?.name}</p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/dashboard"
+                className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
+              >
+                <DollarSign className="h-5 w-5" />
+                <span>Dashboard</span>
+              </Link>
+              <ThemeToggle />
+              <CurrencySelector
+                currentCurrency={userCurrency}
+                onCurrencyChange={setUserCurrency}
+              />
+              <Link
+                href="/notes"
+                className="flex items-center space-x-2 text-gray-600 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400 transition-colors"
+              >
+                <FileText className="h-5 w-5" />
+                <span>Notes</span>
+              </Link>
+              <Link
+                href="/privacy"
+                className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
+              >
+                <Shield className="h-5 w-5" />
+                <span>Privacy</span>
+              </Link>
+              {(session.user as { role?: string })?.role === 'admin' || (session.user as { role?: string })?.role === 'super_admin' ? (
+                <Link
+                  href="/admin/login"
+                  className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400 transition-colors"
+                >
+                  <Settings className="h-5 w-5" />
+                  <span>Admin</span>
+                </Link>
+              ) : null}
+              <button
+                onClick={handleSignOut}
+                className="flex items-center space-x-2 text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 transition-colors"
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">

@@ -13,7 +13,8 @@ import {
   Filter,
   LogOut,
   Shield,
-  Settings
+  Settings,
+  FileText
 } from 'lucide-react'
 import ExpenseForm from '@/components/ExpenseForm'
 import IncomeForm from '@/components/IncomeForm'
@@ -200,6 +201,13 @@ export default function Dashboard() {
                 currentCurrency={userCurrency}
                 onCurrencyChange={setUserCurrency}
               />
+              <Link
+                href="/notes"
+                className="flex items-center space-x-2 text-gray-600 hover:text-green-600 dark:text-gray-300 dark:hover:text-green-400 transition-colors"
+              >
+                <FileText className="h-5 w-5" />
+                <span>Notes</span>
+              </Link>
               <Link
                 href="/privacy"
                 className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
